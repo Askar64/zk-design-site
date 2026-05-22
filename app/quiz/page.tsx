@@ -13,42 +13,52 @@ const styles = [
 
 export default function QuizPage() {
   const [step, setStep] = useState(0);
+
   const [style, setStyle] = useState("");
   const [area, setArea] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   async function submitLead() {
-  const { error } = await supabase.from("leads").insert([
-    {
-      style,
-      area,
-      name,
-      phone,
-    },
-  ]);
+    if (loading) return;
 
-  if (error) {
-    console.log(error);
-    alert("Ошибка отправки заявки");
-    return;
+    setLoading(true);
+
+    const { error } = await supabase.from("leads").insert([
+      {
+        style,
+        area,
+        name,
+        phone,
+      },
+    ]);
+
+    if (error) {
+      console.log(error);
+      alert("Ошибка отправки заявки");
+      setLoading(false);
+      return;
+    }
+
+    await fetch("/api/telegram", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        style,
+        area,
+        name,
+        phone,
+      }),
+    });
+
+    setSuccess(true);
+    setLoading(false);
   }
-
-  await fetch("/api/telegram", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      style,
-      area,
-      name,
-      phone,
-    }),
-  });
-
-  alert("Заявка отправлена");
-}
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -137,12 +147,19 @@ export default function QuizPage() {
                 className="rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl outline-none"
               />
 
-              <button
-                onClick={submitLead}
-                className="mt-4 rounded-2xl bg-white px-8 py-4 text-lg font-medium text-black"
-              >
-                Отправить
-              </button>
+              {success ? (
+                <div className="mt-4 rounded-2xl border border-green-500 bg-green-500/10 px-6 py-5 text-center text-lg text-green-400">
+                  Спасибо! Мы подготовим концепцию и свяжемся с вами.
+                </div>
+              ) : (
+                <button
+                  onClick={submitLead}
+                  disabled={loading}
+                  className="mt-4 rounded-2xl bg-white px-8 py-4 text-lg font-medium text-black transition disabled:opacity-50"
+                >
+                  {loading ? "Отправка..." : "Отправить"}
+                </button>
+              )}
             </div>
           </>
         )}
