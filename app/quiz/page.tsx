@@ -262,10 +262,13 @@ export default function QuizPage() {
       body: JSON.stringify(payload),
     });
 
-    sessionStorage.setItem("quiz_answers", JSON.stringify({ ...answers, name, phone }));
     setSuccess(true);
-    setLoading(false);
-    setTimeout(() => router.push("/moodboard"), 1500);
+setLoading(false);
+
+if (!isCommercial) {
+  sessionStorage.setItem("quiz_answers", JSON.stringify({ ...answers, name, phone }));
+  setTimeout(() => router.push("/moodboard"), 1500);
+}
   }
 
   const slideClass = animating
