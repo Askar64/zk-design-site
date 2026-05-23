@@ -14,7 +14,7 @@ export type MoodboardImage = {
 export const moodboardImages: MoodboardImage[] = [
   {
     id: "1",
-    src: "/moodboard/modern-living.jpg",
+    src: "/modern-living.png",
     alt: "Современная гостиная",
     tags: {
       style: ["Современный"],
@@ -26,7 +26,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "2",
-    src: "/moodboard/modern-bedroom.jpg",
+    src: "/modern-bedroom.png",
     alt: "Современная спальня",
     tags: {
       style: ["Современный"],
@@ -38,7 +38,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "3",
-    src: "/moodboard/minimal-living.jpg",
+    src: "/minimal-living.png",
     alt: "Минималистичная гостиная",
     tags: {
       style: ["Минимализм"],
@@ -50,7 +50,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "4",
-    src: "/moodboard/minimal-bedroom.jpg",
+    src: "/minimal-bedroom.png",
     alt: "Минималистичная спальня",
     tags: {
       style: ["Минимализм"],
@@ -62,7 +62,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "5",
-    src: "/moodboard/scandinavian-living.jpg",
+    src: "/scandinavian-living.png",
     alt: "Скандинавская гостиная",
     tags: {
       style: ["Скандинавский"],
@@ -74,7 +74,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "6",
-    src: "/moodboard/scandinavian-dining.jpg",
+    src: "/scandinavian-dining.png",
     alt: "Скандинавская столовая",
     tags: {
       style: ["Скандинавский"],
@@ -86,7 +86,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "7",
-    src: "/moodboard/classic-living.jpg",
+    src: "/classic-living.png",
     alt: "Современная классика гостиная",
     tags: {
       style: ["Современная классика"],
@@ -98,7 +98,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "8",
-    src: "/moodboard/classic-bedroom.jpg",
+    src: "/classic-bedroom.png",
     alt: "Современная классика спальня",
     tags: {
       style: ["Современная классика"],
@@ -110,7 +110,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "9",
-    src: "/moodboard/neoclassic-living.jpg",
+    src: "/neoclassic-living.png",
     alt: "Неоклассика гостиная",
     tags: {
       style: ["Неоклассика"],
@@ -122,7 +122,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "10",
-    src: "/moodboard/neoclassic-bedroom.jpg",
+    src: "/neoclassic-bedroom.png",
     alt: "Неоклассика спальня",
     tags: {
       style: ["Неоклассика"],
@@ -134,7 +134,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "11",
-    src: "/moodboard/loft-living.jpg",
+    src: "/loft-living.png",
     alt: "Лофт гостиная",
     tags: {
       style: ["Лофт"],
@@ -146,7 +146,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "12",
-    src: "/moodboard/loft-kitchen.jpg",
+    src: "/loft-kitchen.png",
     alt: "Лофт кухня",
     tags: {
       style: ["Лофт"],
@@ -158,7 +158,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "13",
-    src: "/moodboard/japandi-living.jpg",
+    src: "/japandi-living.png",
     alt: "Japandi гостиная",
     tags: {
       style: ["Japandi"],
@@ -170,7 +170,7 @@ export const moodboardImages: MoodboardImage[] = [
   },
   {
     id: "14",
-    src: "/moodboard/japandi-bedroom.jpg",
+    src: "/japandi-bedroom.png",
     alt: "Japandi спальня",
     tags: {
       style: ["Japandi"],
