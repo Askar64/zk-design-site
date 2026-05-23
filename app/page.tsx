@@ -33,7 +33,7 @@ export default function Home() {
           </a>
 
           <a
-            href="https://wa.me/77000000000"
+            href="https://wa.me/77027668867"
             className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-lg backdrop-blur transition hover:bg-white/10"
           >
             WhatsApp
