@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
   // Отправляем текст в оба чата
   for (const chat_id of CHAT_IDS) {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id, text: message }),
