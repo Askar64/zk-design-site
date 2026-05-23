@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -176,6 +177,7 @@ export default function QuizPage() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const totalSteps = questions.length + 1;
   const currentQuestion = questions[step];
@@ -269,6 +271,8 @@ export default function QuizPage() {
     });
 
     setSuccess(true);
+    sessionStorage.setItem("quiz_answers", JSON.stringify({ ...answers, name, phone }));
+setTimeout(() => router.push("/moodboard"), 1500);
     setLoading(false);
   }
 
