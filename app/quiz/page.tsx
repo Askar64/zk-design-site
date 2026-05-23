@@ -3,18 +3,35 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+const propertyTypes = [
+  "Квартира",
+  "Частный дом",
+  "Апартаменты",
+  "Коммерческое помещение",
+];
+
 const styles = [
   "Современный",
   "Минимализм",
   "Japandi",
   "Неоклассика",
-  "Luxury",
+  "Лофт",
+];
+
+const budgets = [
+  "До 10 млн ₸",
+  "10–20 млн ₸",
+  "20–40 млн ₸",
+  "40+ млн ₸",
 ];
 
 export default function QuizPage() {
   const [step, setStep] = useState(0);
 
+  const [propertyType, setPropertyType] = useState("");
   const [style, setStyle] = useState("");
+  const [budget, setBudget] = useState("");
+
   const [area, setArea] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -29,7 +46,9 @@ export default function QuizPage() {
 
     const { error } = await supabase.from("leads").insert([
       {
+        property_type: propertyType,
         style,
+        budget,
         area,
         name,
         phone,
@@ -49,7 +68,9 @@ export default function QuizPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        propertyType,
         style,
+        budget,
         area,
         name,
         phone,
@@ -63,12 +84,16 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto flex max-w-3xl flex-col px-6 py-24">
+        <div className="mb-6 text-sm text-zinc-400">
+          Шаг {step + 1} из 5
+        </div>
+
         <div className="mb-10">
           <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
             <div
               className="h-full bg-white transition-all"
               style={{
-                width: `${((step + 1) / 3) * 100}%`,
+                width: `${((step + 1) / 5) * 100}%`,
               }}
             />
           </div>
@@ -77,19 +102,19 @@ export default function QuizPage() {
         {step === 0 && (
           <>
             <h1 className="text-5xl font-semibold leading-tight">
-              Какой стиль вам ближе?
+              Какая у вас недвижимость?
             </h1>
 
             <div className="mt-10 grid gap-4">
-              {styles.map((item) => (
+              {propertyTypes.map((item) => (
                 <button
                   key={item}
                   onClick={() => {
-                    setStyle(item);
+                    setPropertyType(item);
                     setStep(1);
                   }}
                   className={`rounded-2xl border p-6 text-left text-xl transition ${
-                    style === item
+                    propertyType === item
                       ? "border-white bg-white text-black"
                       : "border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
                   }`}
@@ -111,7 +136,7 @@ export default function QuizPage() {
               type="text"
               value={area}
               onChange={(e) => setArea(e.target.value)}
-              placeholder="Например: 42 м²"
+              placeholder="Например: 85 м²"
               className="mt-10 rounded-2xl border border-zinc-700 bg-zinc-900 px-6 py-5 text-xl outline-none"
             />
 
@@ -125,6 +150,60 @@ export default function QuizPage() {
         )}
 
         {step === 2 && (
+          <>
+            <h1 className="text-5xl font-semibold leading-tight">
+              Какой стиль нравится?
+            </h1>
+
+            <div className="mt-10 grid gap-4">
+              {styles.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    setStyle(item);
+                    setStep(3);
+                  }}
+                  className={`rounded-2xl border p-6 text-left text-xl transition ${
+                    style === item
+                      ? "border-white bg-white text-black"
+                      : "border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h1 className="text-5xl font-semibold leading-tight">
+              Какой бюджет ремонта?
+            </h1>
+
+            <div className="mt-10 grid gap-4">
+              {budgets.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => {
+                    setBudget(item);
+                    setStep(4);
+                  }}
+                  className={`rounded-2xl border p-6 text-left text-xl transition ${
+                    budget === item
+                      ? "border-white bg-white text-black"
+                      : "border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 4 && (
           <>
             <h1 className="text-5xl font-semibold leading-tight">
               Оставьте контакты
