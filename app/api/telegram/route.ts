@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     formData.append("chat_id", process.env.TELEGRAM_CHAT_ID!);
     formData.append(
       "document",
-      new Blob([pdfBuffer], { type: "application/pdf" }),
+      new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
       `moodboard-${name}.pdf`
     );
     formData.append("caption", `📎 Мудборд для ${name}`);
