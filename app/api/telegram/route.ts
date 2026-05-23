@@ -1,5 +1,3 @@
-import { generateMoodboardPDF } from "../../../lib/generate-moodboard-pdf";
-
 const BOT_TOKEN = "8911720086:AAHvQyh0iQ6qouBue7_czMmq_3NQ3SH5CbY";
 const CHAT_IDS = [
   "421669359",
@@ -38,17 +36,23 @@ export async function POST(req: Request) {
 💰 Бюджет: ${budget}
 `;
 
-  // Отправляем текст в оба чата
+  // Сначала текст — всегда должен доходить
   for (const chat_id of CHAT_IDS) {
-     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id, text: message }),
-    });
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id, text: message }),
+      });
+    } catch (e) {
+      console.error("Ошибка отправки текста:", e);
+    }
   }
 
-  // Генерируем PDF и отправляем в оба чата
+  // PDF отдельно — если упадёт, текст уже ушёл
   try {
+    const { generateMoodboardPDF } = await import("../../../lib/generate-moodboard-pdf");
+
     const host = req.headers.get("host") || "";
     const protocol = host.includes("localhost") ? "http" : "https";
     const baseUrl = `${protocol}://${host}`;
@@ -58,22 +62,25 @@ export async function POST(req: Request) {
     });
 
     for (const chat_id of CHAT_IDS) {
-      const formData = new FormData();
-      formData.append("chat_id", chat_id);
-      formData.append(
-        "document",
-        new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
-        `moodboard-${name}.pdf`
-      );
-      formData.append("caption", `📎 Мудборд для ${name}`);
-
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
+        formData.append("chat_id", chat_id);
+        formData.append(
+          "document",
+          new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
+          `moodboard-${name}.pdf`
+        );
+        formData.append("caption", `📎 Мудборд для ${name}`);
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+          method: "POST",
+          body: formData,
+        });
+      } catch (e) {
+        console.error("Ошибка отправки PDF:", e);
+      }
     }
   } catch (e) {
-    console.error("PDF generation error:", e);
+    console.error("Ошибка генерации PDF:", e);
   }
 
   return Response.json({ ok: true });
