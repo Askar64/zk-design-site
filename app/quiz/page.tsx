@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+
 declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
   }
 }
+
 // ─── Жилые вопросы ───────────────────────────────────────────────
 const residentialQuestions = [
   {
@@ -183,6 +185,7 @@ export default function QuizPage() {
     setAnswers({ propertyType: value });
     const commercial = value === "Коммерческое помещение";
     setIsCommercial(commercial);
+    window.fbq?.("trackCustom", "QuizStart", { property_type: value });
     setTimeout(() => goTo(1, "forward"), 180);
   }
 
@@ -252,19 +255,35 @@ export default function QuizPage() {
       phone,
     };
 
-    const { error } = await supabase.from("leads").insert([payload]);
-    if (error) {
-      console.log(error);
-      alert("Ошибка отправки заявки");
+    // 1. Telegram — основной канал доставки заявки. Отправляем первым.
+    let delivered = false;
+    try {
+      const res = await fetch("/api/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      delivered = res.ok;
+    } catch (e) {
+      console.error("Telegram failed:", e);
+    }
+
+    // 2. Supabase — архив. Её падение не должно ломать заявку.
+    try {
+      const { error } = await supabase.from("leads").insert([payload]);
+      if (error) console.error("Supabase failed:", error);
+    } catch (e) {
+      console.error("Supabase failed:", e);
+    }
+
+    // 3. Если заявка не доехала никуда — даём запасной путь.
+    if (!delivered) {
+      alert(
+        "Не удалось отправить заявку. Напишите нам в WhatsApp, пожалуйста — ответим сразу."
+      );
       setLoading(false);
       return;
     }
-
-    fetch("/api/telegram", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
 
     setSuccess(true);
 
@@ -273,12 +292,12 @@ export default function QuizPage() {
       content_category: String(answers.propertyType || ""),
     });
 
-setLoading(false);
+    setLoading(false);
 
-if (!isCommercial) {
-  sessionStorage.setItem("quiz_answers", JSON.stringify({ ...answers, name, phone }));
-  setTimeout(() => router.push("/moodboard"), 1500);
-}
+    if (!isCommercial) {
+      sessionStorage.setItem("quiz_answers", JSON.stringify({ ...answers, name, phone }));
+      setTimeout(() => router.push("/moodboard"), 1500);
+    }
   }
 
   const slideClass = animating
