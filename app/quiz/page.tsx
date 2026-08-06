@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
-
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
 // ─── Жилые вопросы ───────────────────────────────────────────────
 const residentialQuestions = [
   {
@@ -263,6 +267,12 @@ export default function QuizPage() {
     });
 
     setSuccess(true);
+
+    window.fbq?.("track", "Lead", {
+      content_name: isCommercial ? "commercial_quiz" : "residential_quiz",
+      content_category: String(answers.propertyType || ""),
+    });
+
 setLoading(false);
 
 if (!isCommercial) {
