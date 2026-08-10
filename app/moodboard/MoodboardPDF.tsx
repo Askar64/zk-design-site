@@ -7,15 +7,32 @@ import {
   Text,
   Image,
   StyleSheet,
+  Font,
   pdf,
 } from "@react-pdf/renderer";
 import { MoodboardImage } from "../../lib/moodboard-data";
+
+// Встроенный Helvetica не умеет кириллицу — имя клиента и теги выходили пустыми.
+// Регистрируем Roboto из /public/fonts. Внутри функции, а не на уровне модуля:
+// на уровне модуля @react-pdf иногда инициализируется раньше, чем нужно.
+let fontsRegistered = false;
+function registerFonts() {
+  if (fontsRegistered) return;
+  Font.register({
+    family: "Roboto",
+    fonts: [
+      { src: "/fonts/Roboto-Regular.ttf" },
+      { src: "/fonts/Roboto-Bold.ttf", fontWeight: 700 },
+    ],
+  });
+  fontsRegistered = true;
+}
 
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#0a0a0a",
     padding: 32,
-    fontFamily: "Helvetica",
+    fontFamily: "Roboto",
   },
   header: {
     flexDirection: "row",
@@ -28,7 +45,7 @@ const styles = StyleSheet.create({
   studioName: {
     fontSize: 20,
     color: "#ffffff",
-    fontFamily: "Helvetica-Bold",
+    fontWeight: 700,
     letterSpacing: 3,
   },
   clientBlock: { alignItems: "flex-end" },
@@ -81,7 +98,7 @@ function MoodboardDocument({ images, clientName, style, atmosphere, colors, budg
   const date = new Date().toLocaleDateString("ru-RU", {
     day: "numeric", month: "long", year: "numeric",
   });
-  const tags = [style, atmosphere, ...colors.split(", ")].filter(Boolean);
+  const tags = [style, atmosphere, ...(colors || "").split(", ")].filter(Boolean);
 
   return (
     <Document>
@@ -107,27 +124,49 @@ function MoodboardDocument({ images, clientName, style, atmosphere, colors, budg
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>Концепция подготовлена индивидуально</Text>
-          <Text style={styles.footerText}>zkdesign.ru</Text>
+          <Text style={styles.footerText}>zk-design.vercel.app</Text>
         </View>
       </Page>
     </Document>
   );
 }
 
+function safeFileName(name: string) {
+  const cleaned = name.trim().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+  return cleaned ? cleaned.toLowerCase() : "klient";
+}
+
 export async function downloadMoodboardPDF(props: Props) {
+  registerFonts();
+
   const origin = window.location.origin;
-  const propsFixed = {
+  const propsFixed: Props = {
     ...props,
     images: props.images.map((img) => ({
       ...img,
       src: `${origin}${img.src}`,
     })),
   };
-  const blob = await pdf(<MoodboardDocument {...propsFixed} />).toBlob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `moodboard-${props.clientName.replace(/\s+/g, "-").toLowerCase()}.pdf`;
-  a.click();
-  URL.revokeObjectURL(url);
+
+  let url: string | null = null;
+  try {
+    const blob = await pdf(<MoodboardDocument {...propsFixed} />).toBlob();
+    url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `moodboard-${safeFileName(props.clientName)}.pdf`;
+    // Ссылку обязательно нужно вставить в документ — в части браузеров
+    // click() по «висящему в воздухе» элементу молча ничего не делает.
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) {
+    console.error("PDF generation failed:", e);
+    alert("Не удалось собрать PDF. Мы уже получили вашу заявку — дизайнер пришлёт концепцию в переписке.");
+  } finally {
+    // Раньше ссылку удаляли сразу после click(), и браузер не успевал
+    // начать скачивание. Даём ему время.
+    if (url) setTimeout(() => URL.revokeObjectURL(url as string), 60000);
+  }
 }
