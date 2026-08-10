@@ -1,3 +1,12 @@
+const WHATSAPP_PHONE = "77027668867";
+
+// Заготовка первого сообщения. Человеку не нужно придумывать, с чего начать,
+// а вы сразу видите, что он пришёл с сайта, а не из ниоткуда.
+const WHATSAPP_TEXT =
+  "Здравствуйте! Пишу с сайта ZK Design. Хочу узнать про дизайн-проект интерьера.";
+
+const whatsappHref = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(WHATSAPP_TEXT)}`;
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -33,12 +42,18 @@ export default function Home() {
           </a>
 
           <a
-            href="https://wa.me/77027668867"
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-lg backdrop-blur transition hover:bg-white/10"
           >
             WhatsApp
           </a>
         </div>
+
+        <p className="mt-10 text-sm text-zinc-400">
+          Уральск · 8 лет · более 300 реализованных проектов
+        </p>
       </section>
     </main>
   );
