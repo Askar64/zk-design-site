@@ -1,10 +1,18 @@
-const BOT_TOKEN = "8911720086:AAHvQyh0iQ6qouBue7_czMmq_3NQ3SH5CbY";
-const CHAT_IDS = [
-  "421669359",
-  "724141323",
-];
+// Токен и chat_id больше не хранятся в коде — только в переменных окружения Vercel.
+// Префикс NEXT_PUBLIC_ здесь не нужен и вреден: это серверный файл,
+// значения не должны попадать в браузер.
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_IDS = (process.env.TELEGRAM_CHAT_IDS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 export async function POST(req: Request) {
+  if (!BOT_TOKEN || CHAT_IDS.length === 0) {
+    console.error("Telegram не настроен: нет TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_IDS");
+    return Response.json({ ok: false, error: "not_configured" }, { status: 500 });
+  }
+
   const body = await req.json();
 
   const {
@@ -36,14 +44,17 @@ export async function POST(req: Request) {
 💰 Бюджет: ${budget}
 `;
 
-  // Сначала текст — всегда должен доходить
+  // Сначала текст — он всегда должен доходить
+  let anyDelivered = false;
   for (const chat_id of CHAT_IDS) {
     try {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chat_id, text: message }),
       });
+      if (res.ok) anyDelivered = true;
+      else console.error("Telegram sendMessage failed:", chat_id, await res.text());
     } catch (e) {
       console.error("Ошибка отправки текста:", e);
     }
@@ -83,5 +94,6 @@ export async function POST(req: Request) {
     console.error("Ошибка генерации PDF:", e);
   }
 
-  return Response.json({ ok: true });
+  // Возвращаем честный статус: сайт по нему решает, показывать ли человеку успех
+  return Response.json({ ok: anyDelivered }, { status: anyDelivered ? 200 : 502 });
 }
